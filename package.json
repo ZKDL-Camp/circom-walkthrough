@@ -1,0 +1,48 @@
+{
+  "name": "hardhat-template",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "Distributed Lab",
+  "description": "",
+  "keywords": [
+    "solidity",
+    "smart-contracts"
+  ],
+  "files": [
+    "**/*.sol",
+    "!mock/**/*"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "compile": "npx hardhat compile",
+    "clean": "npx hardhat clean",
+    "test": "npx hardhat test",
+    "generate-types": "TYPECHAIN_FORCE=true npx hardhat typechain",
+    "lint-fix": "npm run lint-ts-fix && npm run lint-json-fix && npm run solhint-check",
+    "lint-json-fix": "prettier --write \"./**/*.json\"",
+    "lint-ts-fix": "prettier --write \"./**/*.ts\"",
+    "publish-to-npm": "npm run lint-fix && bash ./scripts/publish.sh --public"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.6",
+    "@solarity/chai-zkit": "^0.2.5",
+    "@solarity/hardhat-zkit": "^0.4.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^4.3.16",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "^18.16.0",
+    "chai": "^4.5.0",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "hardhat": "^2.22.10",
+    "husky": "^9.0.11",
+    "mocha": "^10.7.3",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typechain": "^8.3.2",
+    "typescript": "^5.6.2"
+  }
+}
