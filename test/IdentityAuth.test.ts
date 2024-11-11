@@ -9,7 +9,7 @@ describe("IdentityAuth", () => {
   let identityAuth: IdentityAuth;
 
   before(async () => {
-    identityAuth = await zkit.getCircuit("IdentityAuth");
+    identityAuth = await zkit.getCircuit("circuits/IdentityAuth.circom:IdentityAuth");
   });
 
   it("should correctly build nullifier hash and sign some data", async () => {

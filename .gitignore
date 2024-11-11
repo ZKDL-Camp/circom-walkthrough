@@ -15,3 +15,6 @@ generated-types
 # Hardhat migrate
 .storage.json
 circuits/test
+
+IdentityAuth.witness.json
+IdentityAuth.wtns
