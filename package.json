@@ -18,7 +18,7 @@
     "clean": "npx hardhat clean",
     "test": "npx hardhat test",
     "generate-types": "TYPECHAIN_FORCE=true npx hardhat typechain",
-    "lint-fix": "npm run lint-ts-fix && npm run lint-json-fix && npm run solhint-check",
+    "lint-fix": "npm run lint-ts-fix && npm run lint-json-fix",
     "lint-json-fix": "prettier --write \"./**/*.json\"",
     "lint-ts-fix": "prettier --write \"./**/*.ts\"",
     "publish-to-npm": "npm run lint-fix && bash ./scripts/publish.sh --public"
@@ -27,10 +27,11 @@
     "circomlib": "^2.0.5"
   },
   "devDependencies": {
+    "@iden3/binfileutils": "^0.0.12",
     "@iden3/js-crypto": "^1.1.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.6",
     "@solarity/chai-zkit": "^0.2.5",
-    "@solarity/hardhat-zkit": "^0.4.13",
+    "@solarity/hardhat-zkit": "^0.4.14",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
     "@types/chai": "^4.3.16",
@@ -40,6 +41,7 @@
     "circomkit": "^0.3.1",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.2",
+    "fastfile": "^0.0.20",
     "ffjavascript": "^0.3.1",
     "hardhat": "^2.22.10",
     "husky": "^9.0.11",

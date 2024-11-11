@@ -1,28 +1,70 @@
 import { expect } from "chai";
-import { ethers, zkit } from "hardhat";
+import { ethers } from "hardhat";
 
 import { Circomkit, WitnessTester } from "circomkit";
 
 import { buildNullifier, EVENT_ID, poseidonHash, signRawPoseidon } from "@scripts";
 
+// @ts-ignore
+import { Scalar } from "ffjavascript";
+
+import * as fs from "node:fs";
+
+async function writeWtns(wtnsFileName: string, witnessArray: bigint[]) {
+  const binFileUtils = require("@iden3/binfileutils");
+
+  const prime = Scalar.fromString("21888242871839275222246405745257275088548364400416034343698204186575808495617");
+
+  const fd = await binFileUtils.createBinFile(wtnsFileName, "wtns", 2, 2);
+
+  // Calculate byte size (n8) for encoding each witness element
+  const n8 = (Math.floor((Scalar.bitLength(prime) - 1) / 64) + 1) * 8;
+
+  // Header Section (Section ID 1)
+  await binFileUtils.startWriteSection(fd, 1);
+  await fd.writeULE32(n8); // Write field element byte size
+  await binFileUtils.writeBigInt(fd, prime, n8); // Write prime modulus
+  await fd.writeULE32(witnessArray.length);
+  await binFileUtils.endWriteSection(fd);
+
+  // Witness Section (Section ID 2)
+  await binFileUtils.startWriteSection(fd, 2);
+  for (const witness of witnessArray) {
+    await binFileUtils.writeBigInt(fd, Scalar.mod(witness, prime), n8); // Ensure witness is within field
+  }
+  await binFileUtils.endWriteSection(fd);
+
+  await fd.close();
+}
+
+async function generateProof(wtnsFileName: string) {
+  const snarkjs = require("snarkjs");
+
+  const { proof, publicSignals } = await snarkjs.groth16.prove(
+    "zkit/artifacts/circuits/IdentityAuth.circom/IdentityAuth.zkey",
+    wtnsFileName,
+  );
+
+  return { proof, publicSignals };
+}
+
 describe("IdentityAuth Witness", () => {
   const AUTH_NAME = "IdentityAuth";
-  const MULTIPLIER_NAME = "Multiplier";
 
-  let circuit: WitnessTester<['sk_i', 'eventID', 'messageHash', 'signatureR8x', 'signatureR8y', 'signatureS'], ['nullifier']>;
-  let multiplier2: WitnessTester<['a', 'b'], ['c']>;
+  let circuit: WitnessTester<
+    ["sk_i", "eventID", "messageHash", "signatureR8x", "signatureR8y", "signatureS"],
+    ["nullifier"]
+  >;
 
   before(async () => {
-    const circomkit = new Circomkit();
+    const circomkit = new Circomkit({
+      optimization: 1,
+      dirBuild: "/Users/kyrylr/Desktop/temp/circom-walkthrough/generated",
+    });
 
     circuit = await circomkit.WitnessTester(AUTH_NAME, {
-      file: 'templates/IdentityAuth',
-      template: 'IdentityAuth',
-    });
-    multiplier2 = await circomkit.WitnessTester(MULTIPLIER_NAME, {
-      file: 'templates/Multiplier',
-      template: 'Multiplier',
-      pubs: ['b'],
+      file: "templates/IdentityAuth",
+      template: "IdentityAuth",
     });
   });
 
@@ -32,28 +74,47 @@ describe("IdentityAuth Witness", () => {
     const messageHash = poseidonHash(ethers.hexlify(ethers.randomBytes(32)));
     const signature = signRawPoseidon(privateKeyRaw, messageHash);
 
-    const witness = {
+    const inputs = {
       sk_i: privateKeyRaw,
       eventID: BigInt(EVENT_ID),
       messageHash: BigInt(messageHash),
       signatureR8x: signature.R8[0],
       signatureR8y: signature.R8[1],
       signatureS: signature.S,
-    }
+    };
 
-    const output = await circuit.compute(witness, ['nullifier']);
+    const output = await circuit.compute(inputs, ["nullifier"]);
 
     expect(BigInt(output["nullifier"].toString())).to.equal(BigInt(buildNullifier(privateKeyRaw, EVENT_ID)));
   });
 
-  it.only("should correctly brake the witness", async () => {
-    const witness = {
-      a: 2,
-      b: 3,
-    }
+  it("should correctly brake the witness", async () => {
+    const privateKeyRaw = 14293131380590364977321678307167668994523257149283608421565962523620017225645n;
 
-    const output = await multiplier2.compute(witness, ['c']);
+    const messageHash = poseidonHash(ethers.hexlify(ethers.randomBytes(32)));
+    const signature = signRawPoseidon(privateKeyRaw, messageHash);
 
-    console.log(output);
+    const inputs = {
+      sk_i: privateKeyRaw,
+      eventID: BigInt(EVENT_ID),
+      messageHash: BigInt(messageHash),
+      signatureR8x: signature.R8[0],
+      signatureR8y: signature.R8[1],
+      signatureS: signature.S,
+    };
+
+    const witness = await circuit.calculateWitness(inputs);
+    const badWitness = await circuit.editWitness(witness, {
+      "main.nullifier": BigInt(111111231111),
+    });
+
+    fs.writeFileSync("IdentityAuth.witness.json", JSON.stringify(badWitness, null, 2));
+
+    await writeWtns("IdentityAuth.wtns", badWitness);
+
+    const { proof, publicSignals } = await generateProof("IdentityAuth.wtns");
+
+    console.log(publicSignals);
+    console.log(proof);
   });
 });

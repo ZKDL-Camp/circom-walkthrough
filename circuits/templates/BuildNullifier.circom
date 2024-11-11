@@ -18,5 +18,5 @@ template BuildNullifier() {
     hasher1.out ==> hasher3.inputs[1];
     eventID ==> hasher3.inputs[2];
 
-    nullifier <== hasher3.out;
+    nullifier <-- hasher3.out;
 }

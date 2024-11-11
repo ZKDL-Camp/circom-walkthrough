@@ -22,6 +22,13 @@ const config: HardhatUserConfig = {
       gasMultiplier: 1.2,
     },
   },
+  zkit: {
+    setupSettings: {
+      contributionSettings: {
+        contributions: 0,
+      },
+    },
+  },
   solidity: {
     version: "0.8.20",
     settings: {
