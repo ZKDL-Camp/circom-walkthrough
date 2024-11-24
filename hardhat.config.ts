@@ -23,6 +23,9 @@ const config: HardhatUserConfig = {
     },
   },
   zkit: {
+    compilationSettings: {
+      optimization: "O1",
+    },
     setupSettings: {
       contributionSettings: {
         contributions: 0,
