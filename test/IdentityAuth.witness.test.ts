@@ -53,7 +53,7 @@ describe("IdentityAuth Witness", () => {
 
   let circuit: WitnessTester<
     ["sk_i", "eventID", "messageHash", "signatureR8x", "signatureR8y", "signatureS"],
-    ["nullifier"]
+    ["publicKey"]
   >;
 
   before(async () => {
@@ -83,9 +83,9 @@ describe("IdentityAuth Witness", () => {
       signatureS: signature.S,
     };
 
-    const output = await circuit.compute(inputs, ["nullifier"]);
+    const output = await circuit.compute(inputs, ["publicKey"]);
 
-    expect(BigInt(output["nullifier"].toString())).to.equal(BigInt(buildNullifier(privateKeyRaw, EVENT_ID)));
+    expect(BigInt(output["publicKey"].toString())).to.equal(BigInt(buildNullifier(privateKeyRaw, EVENT_ID)));
   });
 
   it("should correctly brake the witness", async () => {
@@ -105,16 +105,15 @@ describe("IdentityAuth Witness", () => {
 
     const witness = await circuit.calculateWitness(inputs);
     const badWitness = await circuit.editWitness(witness, {
-      "main.nullifier": BigInt(111111231111),
+      "main.publicKey": BigInt(111111231111),
     });
 
     fs.writeFileSync("IdentityAuth.witness.json", JSON.stringify(badWitness, null, 2));
 
     await writeWtns("IdentityAuth.wtns", badWitness);
 
-    const { proof, publicSignals } = await generateProof("IdentityAuth.wtns");
+    const { publicSignals } = await generateProof("IdentityAuth.wtns");
 
-    console.log(publicSignals);
-    console.log(proof);
+    expect(publicSignals[0]).to.be.equal("111111231111");
   });
 });

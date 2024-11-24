@@ -3,8 +3,8 @@ pragma circom 2.1.6;
 
 include "circomlib/circuits/poseidon.circom";
 
-template BuildNullifier() {
-    signal output nullifier;
+template BuildPublicKey() {
+    signal output publicKey;
 
     signal input sk_i;
     signal input eventID;
@@ -18,5 +18,5 @@ template BuildNullifier() {
     hasher1.out ==> hasher3.inputs[1];
     eventID ==> hasher3.inputs[2];
 
-    nullifier <-- hasher3.out;
+    publicKey <-- hasher3.out;
 }

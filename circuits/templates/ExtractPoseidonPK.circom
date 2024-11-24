@@ -3,7 +3,7 @@ pragma circom 2.1.6;
 
 include "circomlib/circuits/escalarmulfix.circom";
 
-template ExtractPublicKey() {
+template ExtractPoseidonPK() {
     signal input  privateKey;
     signal output Ax;
     signal output Ay;

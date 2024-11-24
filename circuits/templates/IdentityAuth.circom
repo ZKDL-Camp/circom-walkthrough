@@ -4,13 +4,13 @@ pragma circom 2.1.6;
 include "circomlib/circuits/babyjub.circom";
 include "circomlib/circuits/poseidon.circom";
 
-include "BuildNullifier.circom";
-include "ExtractPublicKey.circom";
+include "BuildPublicKey.circom";
+include "ExtractPoseidonPK.circom";
 include "OptimizedEdDSAPoseidonVerifier.circom";
 
 template IdentityAuth() {
     // Public Outputs
-    signal output nullifier; // Poseidon3(sk_i, Poseidon1(sk_i), eventID)
+    signal output publicKey; // Poseidon3(sk_i, Poseidon1(sk_i), eventID)
 
     // Public Inputs
     signal input messageHash;
@@ -23,22 +23,22 @@ template IdentityAuth() {
     signal input signatureR8y;
     signal input signatureS;
 
-    // Verify Nullifier
-    component nullifierVerifier = BuildNullifier();
+    // Verify PublicKey
+    component publicKeyBuilder = BuildPublicKey();
 
-    sk_i ==> nullifierVerifier.sk_i;
-    eventID ==> nullifierVerifier.eventID;
+    sk_i ==> publicKeyBuilder.sk_i;
+    eventID ==> publicKeyBuilder.eventID;
 
-    nullifier <== nullifierVerifier.nullifier;
+    publicKey <== publicKeyBuilder.publicKey;
 
-    component getPubKey = ExtractPublicKey();
-    sk_i ==> getPubKey.privateKey;
+    component getPoseidonPK = ExtractPoseidonPK();
+    sk_i ==> getPoseidonPK.privateKey;
 
     component sigVerifier = OptimizedEdDSAPoseidonVerifier();
     sigVerifier.enabled <== 1;
 
-    sigVerifier.Ax <== getPubKey.Ax;
-    sigVerifier.Ay <== getPubKey.Ay;
+    sigVerifier.Ax <== getPoseidonPK.Ax;
+    sigVerifier.Ay <== getPoseidonPK.Ay;
     sigVerifier.S <== signatureS;
     sigVerifier.R8x <== signatureR8x;
     sigVerifier.R8y <== signatureR8y;
