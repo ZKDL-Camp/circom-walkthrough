@@ -10,25 +10,22 @@ include "OptimizedEdDSAPoseidonVerifier.circom";
 
 template IdentityAuth() {
     // Public Outputs
-    signal output publicKey; // Poseidon3(sk_i, Poseidon1(sk_i), eventID)
+    signal output publicKey; // Poseidon3(sk_i)
 
     // Public Inputs
     signal input messageHash;
 
     // Private Inputs
     signal input sk_i;
-    signal input eventID;
 
     signal input signatureR8x;
     signal input signatureR8y;
     signal input signatureS;
 
-    // Verify PublicKey
+    // Build PublicKey
     component publicKeyBuilder = BuildPublicKey();
 
     sk_i ==> publicKeyBuilder.sk_i;
-    eventID ==> publicKeyBuilder.eventID;
-
     publicKey <== publicKeyBuilder.publicKey;
 
     component getPoseidonPK = ExtractPoseidonPK();

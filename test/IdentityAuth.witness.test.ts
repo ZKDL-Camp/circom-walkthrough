@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 import { Circomkit, WitnessTester } from "circomkit";
 
-import { buildNullifier, EVENT_ID, poseidonHash, signRawPoseidon } from "@scripts";
+import { buildNullifier, poseidonHash, signRawPoseidon } from "@scripts";
 
 // @ts-ignore
 import { Scalar } from "ffjavascript";
@@ -51,10 +51,7 @@ async function generateProof(wtnsFileName: string) {
 describe("IdentityAuth Witness", () => {
   const AUTH_NAME = "IdentityAuth";
 
-  let circuit: WitnessTester<
-    ["sk_i", "eventID", "messageHash", "signatureR8x", "signatureR8y", "signatureS"],
-    ["publicKey"]
-  >;
+  let circuit: WitnessTester<["sk_i", "messageHash", "signatureR8x", "signatureR8y", "signatureS"], ["publicKey"]>;
 
   before(async () => {
     const circomkit = new Circomkit({
@@ -76,7 +73,6 @@ describe("IdentityAuth Witness", () => {
 
     const inputs = {
       sk_i: privateKeyRaw,
-      eventID: BigInt(EVENT_ID),
       messageHash: BigInt(messageHash),
       signatureR8x: signature.R8[0],
       signatureR8y: signature.R8[1],
@@ -85,7 +81,7 @@ describe("IdentityAuth Witness", () => {
 
     const output = await circuit.compute(inputs, ["publicKey"]);
 
-    expect(BigInt(output["publicKey"].toString())).to.equal(BigInt(buildNullifier(privateKeyRaw, EVENT_ID)));
+    expect(BigInt(output["publicKey"].toString())).to.equal(BigInt(buildNullifier(privateKeyRaw)));
   });
 
   it("should correctly brake the witness", async () => {
@@ -96,7 +92,6 @@ describe("IdentityAuth Witness", () => {
 
     const inputs = {
       sk_i: privateKeyRaw,
-      eventID: BigInt(EVENT_ID),
       messageHash: BigInt(messageHash),
       signatureR8x: signature.R8[0],
       signatureR8y: signature.R8[1],

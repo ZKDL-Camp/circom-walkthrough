@@ -5,8 +5,6 @@ import { Scalar } from "ffjavascript";
 
 import { babyJub, Poseidon } from "@iden3/js-crypto";
 
-export const EVENT_ID = 5n;
-
 export function poseidonHash(data: string): string {
   data = ethers.hexlify(data);
 
@@ -27,14 +25,8 @@ function splitHexIntoChunks(hexString: string, chunkSize = 64) {
   return chunks.map((chunk) => "0x" + chunk);
 }
 
-export function buildNullifier(pk: bigint, eventID: bigint): string {
-  const secretHash = Poseidon.hash([pk]).toString();
-
-  return poseidonHash(
-    ethers.toBeHex(pk, 32) +
-      ethers.toBeHex(secretHash, 32).replace("0x", "") +
-      ethers.toBeHex(eventID, 32).replace("0x", ""),
-  );
+export function buildNullifier(pk: bigint): string {
+  return Poseidon.hash([pk]).toString();
 }
 
 export function signRawPoseidon(privateKay: bigint, hash: string) {
