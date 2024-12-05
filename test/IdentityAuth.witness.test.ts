@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, zkit } from "hardhat";
 
 import { Circomkit, WitnessTester } from "circomkit";
 
@@ -9,6 +9,8 @@ import { buildNullifier, poseidonHash, signRawPoseidon } from "@scripts";
 import { Scalar } from "ffjavascript";
 
 import * as fs from "node:fs";
+import { IdentityAuth } from "@/generated-types/zkit";
+import { proof } from "@solarity/chai-zkit/dist/core";
 
 async function writeWtns(wtnsFileName: string, witnessArray: bigint[]) {
   const binFileUtils = require("@iden3/binfileutils");
@@ -49,6 +51,8 @@ async function generateProof(wtnsFileName: string) {
 }
 
 describe("IdentityAuth Witness", () => {
+  let identityAuth: IdentityAuth;
+
   const AUTH_NAME = "IdentityAuth";
 
   let circuit: WitnessTester<["sk_i", "messageHash", "signatureR8x", "signatureR8y", "signatureS"], ["publicKey"]>;
@@ -63,6 +67,8 @@ describe("IdentityAuth Witness", () => {
       file: "templates/IdentityAuth",
       template: "IdentityAuth",
     });
+
+    identityAuth = await zkit.getCircuit("IdentityAuth");
   });
 
   it("should correctly verify the witness", async () => {
@@ -107,8 +113,12 @@ describe("IdentityAuth Witness", () => {
 
     await writeWtns("IdentityAuth.wtns", badWitness);
 
-    const { publicSignals } = await generateProof("IdentityAuth.wtns");
+    const proof = await generateProof("IdentityAuth.wtns");
 
-    expect(publicSignals[0]).to.be.equal("111111231111");
+    expect(proof.publicSignals[0]).to.be.equal("111111231111");
+
+    const verifier = await ethers.deployContract("IdentityAuthVerifier");
+
+    expect(identityAuth).to.verifyProof(proof).useSolidityVerifier(verifier);
   });
 });
