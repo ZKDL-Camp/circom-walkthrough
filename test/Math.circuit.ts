@@ -12,9 +12,9 @@ describe("Math Circuit", () => {
 
   it("should revert if trying to generate proof when a is not binary", async () => {
     const inputs: PrivateMath = {
-      a: 2n,
-      b: 3n,
-      c: 6n,
+      x1: 2n,
+      x2: 3n,
+      x3: 6n,
     };
 
     await expect(math.generateProof(inputs)).eventually.to.be.rejectedWith(
@@ -24,23 +24,23 @@ describe("Math Circuit", () => {
 
   it("should multiply two numbers if a = 1", async () => {
     const inputs: PrivateMath = {
-      a: 1n,
-      b: 3n,
-      c: 6n,
+      x1: 1n,
+      x2: 3n,
+      x3: 6n,
     };
 
     const proof = await math.generateProof(inputs);
-    expect(proof.publicSignals.res).to.equal("18");
+    expect(proof.publicSignals.r).to.equal("18");
   });
 
   it("should add two numbers if a = 0", async () => {
     const inputs: PrivateMath = {
-      a: 0n,
-      b: 3n,
-      c: 6n,
+      x1: 0n,
+      x2: 3n,
+      x3: 6n,
     };
 
     const proof = await math.generateProof(inputs);
-    expect(proof.publicSignals.res).to.equal("9");
+    expect(proof.publicSignals.r).to.equal("9");
   });
 });

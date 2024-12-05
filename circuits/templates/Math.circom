@@ -2,20 +2,17 @@
 pragma circom 2.1.6;
 
 template Math() {
-    signal output res;
+    signal output r;
 
-    signal input a;
+    signal input x1;
 
-    signal input b;
-    signal input c;
+    signal input x2;
+    signal input x3;
 
-    a * (1 - a) === 0;
+    x1 * x1 === x1;
 
-    signal mul1 <== a * b;
-    signal mul2 <== a * c;
-    signal res1 <== mul1 * mul2;
+    signal mult <== x2 * x3;
+    signal selectMult <== x1 * mult;
 
-    signal res2 <== (1 - a) * (b + c);
-
-    res1 + res2 ==> res;
+    (1 - x1) * (x2 + x3) + selectMult ==> r;
 }
