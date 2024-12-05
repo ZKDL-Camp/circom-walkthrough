@@ -12,7 +12,6 @@ import { PrivateMath } from "@/generated-types/zkit";
 import loadSymbols from "@/test/loadsyms";
 import r1csPrint from "@/test/r1cs_print";
 
-
 describe("Math Witness", () => {
   const AUTH_NAME = "Math";
 
