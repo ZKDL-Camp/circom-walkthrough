@@ -35,8 +35,9 @@ export default function r1csPrint(r1cs, syms, logger) {
         let vs = r1cs.curve.Fr.toString(lc[k]);
         if (vs == "1") vs = ""; // Do not show ones
         if (vs == "-1") vs = "-"; // Do not show ones
+        if (vs == "21888242871839275222246405745257275088548364400416034343698204186575808495616") vs = "-1";
         if (S != "" && vs[0] != "-") vs = " +" + vs;
-        S = S + vs + ` (${name})`;
+        S = S + vs + ` ${name}`;
       });
       return S;
     };

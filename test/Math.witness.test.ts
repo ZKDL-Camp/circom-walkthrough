@@ -5,14 +5,13 @@ import { Circomkit, WitnessTester } from "circomkit";
 // @ts-ignore
 const readR1cs = require("r1csfile").readR1cs;
 
-// @ts-ignore
-import { Scalar } from "ffjavascript";
+import { babyJub } from "@iden3/js-crypto";
 
 import { PrivateMath } from "@/generated-types/zkit";
 
 import loadSymbols from "@/test/loadsyms";
 import r1csPrint from "@/test/r1cs_print";
-import { rpcQuantity } from "hardhat/internal/core/jsonrpc/types/base-types";
+
 
 describe("Math Witness", () => {
   const AUTH_NAME = "Math";
@@ -52,10 +51,9 @@ describe("Math Witness", () => {
 
   it("should correctly read r1cs file", async () => {
     const r1cs = await readR1cs("zkit/artifacts/circuits/Math.circom/Math.r1cs");
-    const numberOfVars = r1cs.nVars;
-
     expect(r1cs.nConstraints).to.equal(4);
 
+    const numberOfVars = r1cs.nVars;
     const constraint1 = prettifyConstraints(r1cs, numberOfVars, r1cs.constraints[0]);
     const constraint2 = prettifyConstraints(r1cs, numberOfVars, r1cs.constraints[1]);
     const constraint3 = prettifyConstraints(r1cs, numberOfVars, r1cs.constraints[2]);
@@ -69,25 +67,25 @@ describe("Math Witness", () => {
     expect(constraint1[2]).to.deep.equal([ 0n, 0n, 1n, 0n, 0n, 0n, 0n ]);
 
     /* prettier-ignore */
-    expect(constraint2[0]).to.deep.equal([ 0n, 0n, 0n, 21888242871839275222246405745257275088548364400416034343698204186575808495616n, 0n, 0n, 0n ]);
+    expect(constraint2[0]).to.deep.equal([ 0n, 0n, 0n, babyJub.F.negone, 0n, 0n, 0n ]);
     /* prettier-ignore */
     expect(constraint2[1]).to.deep.equal([ 0n, 0n, 0n, 0n, 1n, 0n, 0n ]);
     /* prettier-ignore */
-    expect(constraint2[2]).to.deep.equal([ 0n, 0n, 0n, 0n, 0n, 21888242871839275222246405745257275088548364400416034343698204186575808495616n, 0n ]);
+    expect(constraint2[2]).to.deep.equal([ 0n, 0n, 0n, 0n, 0n, babyJub.F.negone, 0n ]);
 
     /* prettier-ignore */
-    expect(constraint3[0]).to.deep.equal([ 0n, 0n, 21888242871839275222246405745257275088548364400416034343698204186575808495616n, 0n, 0n, 0n, 0n ]);
+    expect(constraint3[0]).to.deep.equal([ 0n, 0n, babyJub.F.negone, 0n, 0n, 0n, 0n ]);
     /* prettier-ignore */
     expect(constraint3[1]).to.deep.equal([ 0n, 0n, 0n, 0n, 0n, 1n, 0n ]);
     /* prettier-ignore */
-    expect(constraint3[2]).to.deep.equal([ 0n, 0n, 0n, 0n, 0n, 0n, 21888242871839275222246405745257275088548364400416034343698204186575808495616n ]);
+    expect(constraint3[2]).to.deep.equal([ 0n, 0n, 0n, 0n, 0n, 0n, babyJub.F.negone ]);
 
     /* prettier-ignore */
-    expect(constraint4[0]).to.deep.equal([ 21888242871839275222246405745257275088548364400416034343698204186575808495616n, 0n, 0n, 0n, 0n, 0n, 0n ]);
+    expect(constraint4[0]).to.deep.equal([ babyJub.F.negone, 0n, 0n, 0n, 0n, 0n, 0n ]);
     /* prettier-ignore */
     expect(constraint4[1]).to.deep.equal([ 0n, 0n, 0n, 1n, 0n, 0n, 0n ]);
     /* prettier-ignore */
-    expect(constraint4[2]).to.deep.equal([ 0n, 21888242871839275222246405745257275088548364400416034343698204186575808495616n, 0n, 0n, 0n, 0n, 0n ]);
+    expect(constraint4[2]).to.deep.equal([ 0n, babyJub.F.negone, 0n, 0n, 0n, 0n, 0n ]);
   });
 
   it("should correctly build witness", async () => {
